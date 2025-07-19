@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "ISEE",
+  "version": "1.0",
+  "permissions": ["scripting", "activeTab"],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+"host_permissions": [
+  "https://jc8skwwk04oks00s8k4gwkgs.hussienx.com/*"
+],
+  "action": {
+    "default_title": "Image Describer"
+  }
+}
