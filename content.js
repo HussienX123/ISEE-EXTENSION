@@ -1,6 +1,7 @@
 function drawRedBordersOnImagesInViewport() {
   document.querySelectorAll("img").forEach((img) => {
     const rect = img.getBoundingClientRect();
+
     const inViewport = (
       rect.top >= 0 &&
       rect.left >= 0 &&
@@ -8,7 +9,9 @@ function drawRedBordersOnImagesInViewport() {
       rect.right <= (window.innerWidth || document.documentElement.clientWidth)
     );
 
-    if (inViewport) {
+    const isBigEnough = img.offsetWidth > 100 && img.offsetHeight > 100;
+
+    if (inViewport && isBigEnough) {
       img.style.border = "3px solid red";
       img.setAttribute("data-image-highlighted", "true");
     } else {
@@ -17,6 +20,7 @@ function drawRedBordersOnImagesInViewport() {
     }
   });
 }
+
 
 async function getBase64FromImage(img) {
   return new Promise((resolve, reject) => {
@@ -45,7 +49,17 @@ async function getBase64FromImage(img) {
 
 async function processImages() {
   const images = [...document.querySelectorAll("img")]
-    .filter(img => img.offsetWidth > 0 && img.offsetHeight > 0);
+    .filter(img => {
+      const rect = img.getBoundingClientRect();
+      const inViewport = (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+      );
+      const isBigEnough = img.offsetWidth > 100 && img.offsetHeight > 100;
+      return inViewport && isBigEnough;
+    });
 
   for (let img of images) {
     try {
@@ -61,7 +75,11 @@ async function processImages() {
 
       if (json.description) {
         console.log("📜 Arabic Description:\n", json.description);
-        playBase64Audio(json.audioBase64);
+      chrome.runtime.sendMessage({
+        audio64: json.audioBase64, // your encoded audio
+        mimeType: "audio/mpeg" // or "audio/wav"
+      });
+
       } else {
         console.warn("No description returned from API.");
       }
@@ -73,6 +91,7 @@ async function processImages() {
 }
 
 function playBase64Audio(audioBase64) {
+  console.log(audioBase64);
   // Convert base64 to binary
   const byteCharacters = atob(audioBase64);
   const byteArrays = [];
@@ -114,3 +133,4 @@ document.addEventListener("keydown", (e) => {
     processImages();
   }
 });
+
